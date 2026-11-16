@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>零基礎重訓與長肌肉入門指南 - 互動式教學簡報</title>
+  <style>
+    :root {
+      --bg-dark: #0a0c10;
+      --deck-bg: radial-gradient(circle at 50% 10%, #161a26 0%, #0d1017 100%);
+      --card-bg: rgba(26, 31, 46, 0.7);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --primary-green: #10b981;
+      --primary-glow: rgba(16, 185, 129, 0.3);
+      --amber: #f59e0b;
+      --amber-glow: rgba(245, 158, 11, 0.25);
+      --cyan: #06b6d4;
+      --rose: #f43f5e;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* 頂部進度條 */
+    #progress-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: #141824;
+      z-index: 100;
+    }
+
+    #progress-bar {
+      height: 100%;
+      width: 8.33%;
+      background: linear-gradient(90deg, var(--primary-green), var(--cyan));
+      box-shadow: 0 0 12px var(--primary-green);
+      transition: width 0.35s ease;
+    }
+
+    /* 16:9 主容器 */
+    #deck-wrapper {
+      position: relative;
+      width: 90vw;
+      max-width: 1120px;
+      aspect-ratio: 16 / 9;
+      background: var(--deck-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.8), 0 0 50px rgba(16, 185, 129, 0.06);
+      display: flex;
+      flex-direction: column;
+      padding: 34px 50px;
+      justify-content: space-between;
+      overflow: hidden;
+    }
+
+    /* 頂部 Header */
+    .slide-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 14px;
+    }
+
+    .brand-tag {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--primary-green);
+      text-transform: uppercase;
+    }
+
+    .brand-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--primary-green);
+      box-shadow: 0 0 8px var(--primary-green);
+    }
+
+    .layout-badge {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--cyan);
+      background: rgba(6, 182, 212, 0.12);
+      border: 1px solid rgba(6, 182, 212, 0.25);
+      border-radius: 4px;
+      padding: 2px 8px;
+      margin-left: 8px;
+    }
+
+    .slide-counter {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .slide-counter span {
+      color: var(--primary-green);
+      font-weight: 800;
+      font-size: 1.05rem;
+    }
+
+    /* 投影片主區域 */
+    .slide-container {
+      position: relative;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 0;
+    }
+
+    .slide {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      transform: scale(0.98) translateY(12px);
+      pointer-events: none;
+      transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .slide.active {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+      pointer-events: auto;
+    }
+
+    /* 通用大標題 */
+    .slide-title {
+      font-size: 1.95rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.3;
+      margin-bottom: 22px;
+      background: linear-gradient(135deg, #ffffff 50%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* ==========================================================
+       版型 A：封面與總結頁 (Hero / Summary Layout)
+       居中大標題、極簡運動幾何 SVG、無條列框、精緻居中排版
+    ========================================================== */
+    .layout-a {
+      text-align: center;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+    }
+
+    .layout-a .hero-icon-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      box-shadow: 0 0 25px var(--primary-glow);
+      margin-bottom: 4px;
+    }
+
+    .layout-a .hero-svg {
+      width: 38px;
+      height: 38px;
+      stroke: var(--primary-green);
+      stroke-width: 2;
+      fill: none;
+    }
+
+    .layout-a .slide-title {
+      font-size: 2.2rem;
+      margin-bottom: 8px;
+    }
+
+    .layout-a .hero-content-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    .layout-a .hero-item {
+      font-size: 1.15rem;
+      line-height: 1.5;
+      color: #e2e8f0;
+      position: relative;
+      padding: 0 16px;
+    }
+
+    .layout-a .hero-item .hero-highlight {
+      color: var(--primary-green);
+      font-weight: 700;
+    }
+
+    /* ==========================================================
+       版型 B：大數字數據卡 (Big Numbers Metric Cards)
+       3 欄並列卡片，關鍵數據醒目放大高亮
+    ========================================================== */
+    .layout-b .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      width: 100%;
+    }
+
+    .layout-b .metric-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-top: 4px solid var(--primary-green);
+      border-radius: 14px;
+      padding: 22px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .layout-b .metric-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .layout-b .metric-badge-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--primary-green);
+      background: rgba(16, 185, 129, 0.12);
+      padding: 3px 10px;
+      border-radius: 6px;
+      align-self: flex-start;
+      letter-spacing: 0.04em;
+    }
+
+    .layout-b .metric-big-number {
+      font-size: 2.1rem;
+      font-weight: 900;
+      color: #ffffff;
+      line-height: 1.1;
+      font-family: var(--font-sans);
+      letter-spacing: -0.03em;
+    }
+
+    .layout-b .metric-big-number span {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--cyan);
+      margin-left: 4px;
+    }
+
+    .layout-b .metric-full-text {
+      font-size: 0.98rem;
+      line-height: 1.5;
+      color: #cbd5e1;
+    }
+
+    /* ==========================================================
+       版型 C：雙欄左右對照 (Two-Column Comparison PK Cards)
+       左右並排對照卡片，呈現概念比較
+    ========================================================== */
+    .layout-c .dual-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      width: 100%;
+      margin-bottom: 12px;
+    }
+
+    .layout-c .dual-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+    }
+
+    .layout-c .dual-card.left {
+      border-left: 4px solid var(--cyan);
+    }
+
+    .layout-c .dual-card.right {
+      border-left: 4px solid var(--amber);
+    }
+
+    .layout-c .dual-header {
+      font-size: 1.05rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .layout-c .dual-card.left .dual-header { color: var(--cyan); }
+    .layout-c .dual-card.right .dual-header { color: var(--amber); }
+
+    .layout-c .dual-text {
+      font-size: 1.02rem;
+      line-height: 1.55;
+      color: #e2e8f0;
+    }
+
+    .layout-c .bottom-anchor-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-left: 4px solid var(--primary-green);
+      border-radius: 10px;
+      padding: 12px 18px;
+      font-size: 0.96rem;
+      line-height: 1.45;
+      color: #cbd5e1;
+    }
+
+    /* ==========================================================
+       版型 D：橫向階梯／流程圖 (Horizontal Step Flow)
+       橫向卡片搭配連接箭頭，呈現循序步驟與週期
+    ========================================================== */
+    .layout-d .stepper-container {
+      display: flex;
+      align-items: stretch;
+      gap: 14px;
+      width: 100%;
+    }
+
+    .layout-d .step-card {
+      flex: 1;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-top: 4px solid var(--cyan);
+      border-radius: 14px;
+      padding: 20px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+    }
+
+    .layout-d .step-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .layout-d .step-badge {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #0c0e12;
+      background: var(--cyan);
+      border-radius: 6px;
+      padding: 3px 10px;
+    }
+
+    .layout-d .step-title-inline {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .layout-d .step-body-text {
+      font-size: 0.98rem;
+      line-height: 1.55;
+      color: #cbd5e1;
+    }
+
+    .layout-d .step-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary-green);
+      font-size: 1.4rem;
+      opacity: 0.7;
+    }
+
+    /* ==========================================================
+       版型 E：迷思破解卡 (Myth-Buster Contrast Layout)
+       ❌ 常見盲點 vs. ✅ 科學真相 對比結構
+    ========================================================== */
+    .layout-e .myth-container {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      width: 100%;
+    }
+
+    .layout-e .myth-pair-card {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .layout-e .myth-box {
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .layout-e .myth-box.wrong {
+      background: rgba(244, 63, 94, 0.08);
+      border: 1px solid rgba(244, 63, 94, 0.25);
+      border-left: 4px solid var(--rose);
+    }
+
+    .layout-e .myth-box.truth {
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      border-left: 4px solid var(--primary-green);
+    }
+
+    .layout-e .myth-label {
+      font-size: 0.85rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      letter-spacing: 0.03em;
+    }
+
+    .layout-e .myth-box.wrong .myth-label { color: var(--rose); }
+    .layout-e .myth-box.truth .myth-label { color: var(--primary-green); }
+
+    .layout-e .myth-text {
+      font-size: 0.98rem;
+      line-height: 1.5;
+      color: #e2e8f0;
+    }
+
+    .layout-e .conclusion-banner {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 12px 18px;
+      font-size: 0.96rem;
+      line-height: 1.45;
+      color: #cbd5e1;
+    }
+
+    /* 底部 Footer */
+    .slide-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding-top: 14px;
+    }
+
+    .source-tag {
+      font-size: 0.85rem;
+      color: var(--amber);
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .source-tag::before {
+      content: "📌";
+      font-size: 0.8rem;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .control-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-main);
+      padding: 7px 15px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .control-btn:hover:not(:disabled) {
+      background: var(--primary-green);
+      border-color: var(--primary-green);
+      color: #0c0e12;
+      box-shadow: 0 0 12px var(--primary-glow);
+    }
+
+    .control-btn:disabled {
+      opacity: 0.25;
+      cursor: not-allowed;
+    }
+
+    /* 鍵盤操作提示 */
+    .keyboard-hint {
+      position: fixed;
+      bottom: 14px;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      display: flex;
+      gap: 16px;
+    }
+
+    .key-badge {
+      background: #141824;
+      border: 1px solid #283046;
+      border-radius: 4px;
+      padding: 2px 6px;
+      color: var(--text-muted);
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 頂部進度條 -->
+  <div id="progress-container">
+    <div id="progress-bar"></div>
+  </div>
+
+  <!-- 簡報主視窗 (16:9) -->
+  <div id="deck-wrapper">
+    
+    <!-- 頂部資訊欄 -->
+    <header class="slide-header">
+      <div class="brand-tag">
+        <span class="brand-dot"></span>
+        零基礎重訓與長肌肉入門指南
+      </div>
+      <div class="slide-counter">
+        投影片 <span id="current-slide">01</span> / 12
+      </div>
+    </header>
+
+    <!-- 投影片內容集合 -->
+    <main class="slide-container">
+
+      <!-- ==========================================
+           Slide 01: 版型 A (封面頁 - 居中大標題與極簡 SVG)
+      ========================================== -->
+      <article class="slide active layout-a" data-slide="1" data-layout="版型 A (封面頁)" data-source="[來源: wiki/principles.md]">
+        <div class="hero-icon-container">
+          <svg class="hero-svg" viewBox="0 0 24 24">
+            <path d="M6 5v14M18 5v14M2 9v6M22 9v6M6 12h12" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h1 class="slide-title">起步不難：為什麼零基礎的你更需要重訓？</h1>
+        <div class="hero-content-group">
+          <p class="hero-item">重訓本質很親民：從椅子站起、腿撐住體重，就已經是重量訓練</p>
+          <p class="hero-item">受傷不是練太多，而是因為亂練：加重太快、沒暖身或姿勢錯誤</p>
+          <p class="hero-item">關節退化更要練：肌肉是天然避震器，強健腿臀能替膝蓋直接卸壓</p>
+        </div>
+      </article>
+
+      <!-- ==========================================
+           Slide 02: 版型 B (大數字數據卡 - 3 欄並列放大數值)
+      ========================================== -->
+      <article class="slide layout-b" data-slide="2" data-layout="版型 B (大數字卡)" data-source="[來源: wiki/principles.md]">
+        <h1 class="slide-title">肌肉是你的長效代謝引擎：基礎代謝與體態重塑</h1>
+        <div class="metric-grid">
+          <div class="metric-card">
+            <span class="metric-badge-label">每日靜態耗能</span>
+            <div class="metric-big-number">+15~30 <span>大卡/天</span></div>
+            <p class="metric-full-text">打造易瘦體質：每增加 1 公斤肌肉，每日基礎代謝率約提升 15～30 大卡</p>
+          </div>
+          <div class="metric-card">
+            <span class="metric-badge-label">30歲後年流失率</span>
+            <div class="metric-big-number">-0.5%~1% <span>每年</span></div>
+            <p class="metric-full-text">儲存肌肉本錢：30 歲後肌肉每年自然流失 0.5%～1%，重訓能維持骨質</p>
+          </div>
+          <div class="metric-card">
+            <span class="metric-badge-label">身體組成指標</span>
+            <div class="metric-big-number">體態 <span>&gt; 體重</span></div>
+            <p class="metric-full-text">體態重於體重：肌肉密度大於脂肪，體重沒變身形依然會緊實一圈</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- ==========================================
+           Slide 03: 版型 C (雙欄左右對照 - 全身 vs 分部 PK 卡)
+      ========================================== -->
+      <article class="slide layout-c" data-slide="3" data-layout="版型 C (雙欄對照)" data-source="[來源: wiki/principles.md]">
+        <h1 class="slide-title">科學打破分部迷思：增肌關鍵在於「總訓練量」</h1>
+        <div class="dual-grid">
+          <div class="dual-card left">
+            <div class="dual-header">⏱️ 集中模式 vs 散開模式</div>
+            <p class="dual-text">頻率本質在分攤：集中一天做 12 組胸推，或分三天各做 4 組，成效相當</p>
+          </div>
+          <div class="dual-card right">
+            <div class="dual-header">🎯 生活節奏最佳化</div>
+            <p class="dual-text">生活節奏優先：不需迷信特定流派，能長期持續執行的課表就是最好課表</p>
+          </div>
+        </div>
+        <div class="bottom-anchor-card">
+          實證破除神話：2024 年統合分析指出，總訓練量相等時全身與分部增肌無差
+        </div>
+      </article>
+
+      <!-- ==========================================
+           Slide 04: 版型 D (橫向階梯／流程圖 - 超負荷 3 步)
+      ========================================== -->
+      <article class="slide layout-d" data-slide="4" data-layout="版型 D (橫向流程)" data-source="[來源: wiki/principles.md]">
+        <h1 class="slide-title">肌肉成長的引擎：漸進式超負荷加重規則</h1>
+        <div class="stepper-container">
+          <div class="step-card">
+            <div class="step-header">
+              <span class="step-badge">STEP 1</span>
+              <span class="step-title-inline">基準選定</span>
+            </div>
+            <p class="step-body-text">起始負荷基準：以 8～12 RM 為起點，全程維持標準姿勢不變形</p>
+          </div>
+          <div class="step-arrow">➔</div>
+          <div class="step-card">
+            <div class="step-header">
+              <span class="step-badge">STEP 2</span>
+              <span class="step-title-inline">達標信號</span>
+            </div>
+            <p class="step-body-text">達標加重信號：連續 3 組做滿上限次數，且最後一組還能多做 1～2 下</p>
+          </div>
+          <div class="step-arrow">➔</div>
+          <div class="step-card">
+            <div class="step-header">
+              <span class="step-badge">STEP 3</span>
+              <span class="step-title-inline">微幅加重</span>
+            </div>
+            <p class="step-body-text">穩健加重公式：下一次訓練微幅調重 2%～5%，或啞鈴每邊加 1.25～2.5 公斤</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- ==========================================
+           Slide 05: 版型 E (迷思破解卡 - 天數決策對比)
+      ========================================== -->
+      <article class="slide layout-e" data-slide="5" data-layout="版型 E (迷思破解)" data-source="[來源: wiki/routines.md]">
+        <h1 class="slide-title">時間有限怎麼練？每週 2～3 天課表天數決策</h1>
+        <div class="myth-container">
+          <div class="myth-pair-card">
+            <div class="myth-box wrong">
+              <div class="myth-label">⚡ 每週 2 天排程方案</div>
+              <p class="myth-text">每週 2 天全身課表：用最少時間練到主要肌群，符合世界衛生組織建議</p>
+            </div>
+            <div class="myth-box truth">
+              <div class="myth-label">⚡ 每週 3 天排程方案</div>
+              <p class="myth-text">每週 3 天全身或推拉腿：單次訓練時間若過長，可轉為推、拉、腿分日施訓</p>
+            </div>
+          </div>
+          <div class="conclusion-banner">
+            關鍵修復原則：每次重訓之間間隔至少 1 天休息，肌肉修復才會強壯
+          </div>
+        </div>
+      </article>
+
+      <!-- ==========================================
+           Slide 06: 版型 B (大數字數據卡 - 組數、次數、休息秒數)
+      ========================================== -->
+      <article class="slide layout-b" data-slide="6" data-layout="版型 B (大數字卡)" data-source="[來源: wiki/routines.md]">
+        <h1 class="slide-title">新手關鍵參數共識：組數、次數與組間休息</h1>
+        <div class="metric-grid">
+          <div class="metric-card">
+            <span class="metric-badge-label">動作組數</span>
+            <div class="metric-big-number">2～3 <span>組</span></div>
+            <p class="metric-full-text">動作組數：每個動作做 2～3 組，初期挑選 3～4 個複合大動作即可</p>
+          </div>
+          <div class="metric-card">
+            <span class="metric-badge-label">每組次數</span>
+            <div class="metric-big-number">8～12 <span>下</span></div>
+            <p class="metric-full-text">每組次數：入門肌肥大 8～12 下，剛起步強化肌耐力可做 12～15 下</p>
+          </div>
+          <div class="metric-card">
+            <span class="metric-badge-label">組間休息</span>
+            <div class="metric-big-number">60～120 <span>秒</span></div>
+            <p class="metric-full-text">組間休息：肌耐力休 30～60 秒，肌肥大休 60～120 秒，呼吸急促應主動延長</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- ==========================================
+           Slide 07: 版型 D (橫向階梯／流程圖 - 12週期化三階段)
+      ========================================== -->
+      <article class="slide layout-d" data-slide="7" data-layout="版型 D (橫向流程)" data-source="[來源: wiki/routines.md]">
+        <h1 class="slide-title">零基礎 12 週三階段漸進期化計畫</h1>
+        <div class="stepper-container">
+          <div class="step-card">
+            <div class="step-header">
+              <span class="step-badge">第 1～4 週</span>
+              <span class="step-title-inline">基礎期</span>
+            </div>
+            <p class="step-body-text">第 1～4 週基礎期：每週 2～3 次全身 6 大動作，建立神經發力地基</p>
+          </div>
+          <div class="step-arrow">➔</div>
+          <div class="step-card">
+            <div class="step-header">
+              <span class="step-badge">第 5～8 週</span>
+              <span class="step-title-inline">成長期</span>
+            </div>
+            <p class="step-body-text">第 5～8 週成長期：每週 3 次上下肢分化，動作升級並嘗試微幅加重</p>
+          </div>
+          <div class="step-arrow">➔</div>
+          <div class="step-card">
+            <div class="step-header">
+              <span class="step-badge">第 9～12 週</span>
+              <span class="step-title-inline">習慣期</span>
+            </div>
+            <p class="step-body-text">第 9～12 週習慣期：每週 3～4 次部位分化，訓練融入作息，感受度全開</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- ==========================================
+           Slide 08: 版型 C (雙欄左右對照 - 深蹲 vs 臀推 PK 卡)
+      ========================================== -->
+      <article class="slide layout-c" data-slide="8" data-layout="版型 C (雙欄對照)" data-source="[來源: wiki/exercises.md]">
+        <h1 class="slide-title">下肢基石：高腳杯深蹲與關節友善臀推</h1>
+        <div class="dual-grid">
+          <div class="dual-card left">
+            <div class="dual-header">🏋️ 高腳杯深蹲要點</div>
+            <p class="dual-text">高腳杯深蹲：胸前捧啞鈴助軀幹打直，雙腳與肩同寬，膝蓋順腳尖不內夾</p>
+          </div>
+          <div class="dual-card right">
+            <div class="dual-header">🛡️ 關節零剪力臀推</div>
+            <p class="dual-text">臀推與橋式：平躺頂起骨盆，對膝蓋零剪力，高效喚醒久坐失憶的臀大肌</p>
+          </div>
+        </div>
+        <div class="bottom-anchor-card">
+          關節友善進階：蚌殼式與橋式打底，手扶淺蹲起步，三個月可無痛負重深蹲
+        </div>
+      </article>
+
+      <!-- ==========================================
+           Slide 09: 版型 E (迷思破解卡 - 代償手痠 vs 正確發力)
+      ========================================== -->
+      <article class="slide layout-e" data-slide="9" data-layout="版型 E (迷思破解)" data-source="[來源: wiki/exercises.md]">
+        <h1 class="slide-title">上肢推與拉：胸推、划船與防手臂代償心法</h1>
+        <div class="myth-container">
+          <div class="myth-pair-card">
+            <div class="myth-box wrong">
+              <div class="myth-label">❌ 常見代償盲點</div>
+              <p class="myth-text">破解代償盲點：划船手痠背不痠代表重量過重，立即減重才能找回背肌發力</p>
+            </div>
+            <div class="myth-box truth">
+              <div class="myth-label">✅ 標準發力技巧</div>
+              <p class="myth-text">單手划船心法：背打平，專注「手肘往後上方帶動」並夾緊中央肩胛骨</p>
+            </div>
+          </div>
+          <div class="conclusion-banner">
+            啞鈴胸推：平躺長凳，推至肩膀正上方手肘不鎖死，下放時充分拉伸胸肌
+          </div>
+        </div>
+      </article>
+
+      <!-- ==========================================
+           Slide 10: 版型 C (雙欄左右對照 - 自由重量 vs 固定器械)
+      ========================================== -->
+      <article class="slide layout-c" data-slide="10" data-layout="版型 C (雙欄對照)" data-source="[來源: wiki/exercises.md]">
+        <h1 class="slide-title">器材選擇與呼吸安全：自由重量與腹內壓</h1>
+        <div class="dual-grid">
+          <div class="dual-card left">
+            <div class="dual-header">🎯 自由重量 (Free Weights)</div>
+            <p class="dual-text">自由重量優勢：啞鈴能鍛鍊深層自主平衡力，生活中無軌道，實用轉移度最高</p>
+          </div>
+          <div class="dual-card right">
+            <div class="dual-header">⚙️ 固定器械 (Machines)</div>
+            <p class="dual-text">固定器械定位：順導軌走易上手，適合大動作後補充安全訓練量</p>
+          </div>
+        </div>
+        <div class="bottom-anchor-card">
+          呼吸安全守則：吸氣準備、出力吐氣；腹內壓自然收緊護腰，切勿過度憋氣
+        </div>
+      </article>
+
+      <!-- ==========================================
+           Slide 11: 版型 B (大數字數據卡 - 蛋白質、補水、飲食窗口)
+      ========================================== -->
+      <article class="slide layout-b" data-slide="11" data-layout="版型 B (大數字卡)" data-source="[來源: wiki/nutrition.md]">
+        <h1 class="slide-title">吃對才長肉：蛋白質計算、補水與黃金進食時機</h1>
+        <div class="metric-grid">
+          <div class="metric-card">
+            <span class="metric-badge-label">每日蛋白質</span>
+            <div class="metric-big-number">1.6～2.0 <span>g/kg</span></div>
+            <p class="metric-full-text">蛋白質公式：每公斤體重吃 1.6～2.0 公克（60 公斤成人約需 96～120 克）</p>
+          </div>
+          <div class="metric-card">
+            <span class="metric-badge-label">進食時間窗口</span>
+            <div class="metric-big-number">30分～2小時 <span>窗口</span></div>
+            <p class="metric-full-text">飲食時間窗口：練前 1～2 小時補好消化碳水；練後 30 分～2 小時補蛋白與碳水</p>
+          </div>
+          <div class="metric-card">
+            <span class="metric-badge-label">每日水分</span>
+            <div class="metric-big-number">30～40 <span>ml/kg</span></div>
+            <p class="metric-full-text">飲水與恢復：每日喝足體重乘 30～40 毫升水，深層睡眠是修復肌肉的黃金期</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- ==========================================
+           Slide 12: 版型 A (總結頁 - 居中大標題與極簡 SVG)
+      ========================================== -->
+      <article class="slide layout-a" data-slide="12" data-layout="版型 A (總結頁)" data-source="[來源: wiki/faq.md]">
+        <div class="hero-icon-container">
+          <svg class="hero-svg" viewBox="0 0 24 24">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h1 class="slide-title">新手避坑指南：破除四大心態盲區，持續前行</h1>
+        <div class="hero-content-group">
+          <p class="hero-item">避開進度陷阱：不一開始排太滿（先一週 2 次）、不被體重數字綁架看圍度</p>
+          <p class="hero-item">破除盲目跟風：品質大於重量，練哪該痠哪；不懂就問，不盲從網路影片</p>
+          <p class="hero-item">立即啟動改變：放下所有焦慮，從今天的一組自重深蹲開始為自己存肌肉</p>
+        </div>
+      </article>
+
+    </main>
+
+    <!-- 底部功能欄 -->
+    <footer class="slide-footer">
+      <div id="source-display" class="source-tag">[來源: wiki/principles.md]</div>
+      <div class="controls">
+        <button id="prev-btn" class="control-btn" aria-label="上一頁">← 上一頁</button>
+        <button id="next-btn" class="control-btn" aria-label="下一頁">下一頁 →</button>
+        <button id="fs-btn" class="control-btn" aria-label="全螢幕切換">⛶ 全螢幕</button>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- 快捷鍵提示 -->
+  <div class="keyboard-hint">
+    <span>切換投影片：<span class="key-badge">←</span> <span class="key-badge">→</span> 或 <span class="key-badge">Space</span></span>
+    <span>全螢幕：<span class="key-badge">F</span></span>
+  </div>
+
+  <script>
+    (function() {
+      const slides = document.querySelectorAll('.slide');
+      const total = slides.length;
+      let current = 0;
+
+      const prevBtn = document.getElementById('prev-btn');
+      const nextBtn = document.getElementById('next-btn');
+      const fsBtn = document.getElementById('fs-btn');
+      const currentLabel = document.getElementById('current-slide');
+      const progressBar = document.getElementById('progress-bar');
+      const sourceDisplay = document.getElementById('source-display');
+      const layoutBadge = document.getElementById('layout-badge');
+
+      function updateSlide(index) {
+        if (index < 0 || index >= total) return;
+        current = index;
+
+        slides.forEach((s, i) => {
+          s.classList.toggle('active', i === current);
+        });
+
+        // 更新計數與進度條
+        const padIndex = String(current + 1).padStart(2, '0');
+        currentLabel.textContent = padIndex;
+        progressBar.style.width = ((current + 1) / total * 100) + '%';
+
+        // 更新來源標籤與版型提示
+        const activeSlide = slides[current];
+        sourceDisplay.textContent = activeSlide.getAttribute('data-source') || '';
+        layoutBadge.textContent = activeSlide.getAttribute('data-layout') || '';
+
+        // 更新按鈕狀態
+        prevBtn.disabled = (current === 0);
+        nextBtn.disabled = (current === total - 1);
+      }
+
+      // 按鈕監聽
+      prevBtn.addEventListener('click', () => updateSlide(current - 1));
+      nextBtn.addEventListener('click', () => updateSlide(current + 1));
+
+      // 全螢幕切換
+      function toggleFullScreen() {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(err => {
+            console.warn("Fullscreen request error:", err);
+          });
+        } else {
+          if (document.exitFullscreen) {
+            document.exitFullscreen();
+          }
+        }
+      }
+      fsBtn.addEventListener('click', toggleFullScreen);
+
+      // 鍵盤導航監聽
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+          e.preventDefault();
+          updateSlide(current + 1);
+        } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+          e.preventDefault();
+          updateSlide(current - 1);
+        } else if (e.key === 'f' || e.key === 'F') {
+          toggleFullScreen();
+        } else if (e.key === 'Home') {
+          updateSlide(0);
+        } else if (e.key === 'End') {
+          updateSlide(total - 1);
+        }
+      });
+
+      // 初始化
+      updateSlide(0);
+    })();
+  </script>
+</body>
+</html>
